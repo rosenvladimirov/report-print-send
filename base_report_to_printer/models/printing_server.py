@@ -37,7 +37,7 @@ class PrintingServer(models.Model):
         self.ensure_one()
         connection = False
         try:
-            connection = cups.Connection(host=self.address, port=self.port)
+            connection = cups.Connection()
         except:
             message = _("Failed to connect to the CUPS server on %s:%s. "
                         "Check that the CUPS server is running and that "

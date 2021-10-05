@@ -15,6 +15,7 @@ odoo.define('base_report_to_printer.print', function (require) {
 
             if (action_val.report_type === 'qweb-pdf') {
                 framework.blockUI();
+                console.log("print", action_val);
                 rpc.query({
                     model: 'ir.actions.report',
                     method: 'print_action_for_report_name',

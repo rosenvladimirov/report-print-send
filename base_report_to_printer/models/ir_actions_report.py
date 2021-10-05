@@ -7,6 +7,8 @@
 
 from odoo import api, exceptions, fields, models, _
 
+import logging
+_logger = logging.getLogger(__name__)
 
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
@@ -80,6 +82,8 @@ class IrActionsReport(models.Model):
     @api.multi
     def behaviour(self):
         self.ensure_one()
+        if self._context.get('force_result'):
+            return self._context['force_result']
         printing_act_obj = self.env['printing.report.xml.action']
 
         result = self._get_user_default_print_behaviour()
@@ -116,6 +120,28 @@ class IrActionsReport(models.Model):
                                       doc_format=self.report_type,
                                       **behaviour)
 
+#    @api.multi
+#    def print_document_glabels(self, record_ids, data=None):
+#        """ Print a document, do not return the document file """
+#        ctx = self._context.copy()
+#        ctx.update(dict(must_skip_send_to_printer=True))
+#        report = request.env['ir.actions.report']._get_report_from_name(reportname)
+#        _logger.info("Data %s:%s::%s" % (record_ids, data, ctx))
+#
+#        document, doc_format = self.with_context(ctx).render_glabels(
+#                record_ids, data=data)
+#        behaviour = self.behaviour()
+#        printer = behaviour.pop('printer', None)
+#
+#        if not printer:
+#            raise exceptions.Warning(
+#                _('No printer configured to print this report.')
+#            )
+#        # TODO should we use doc_format instead of report_type
+#        return printer.print_document(self, document,
+#                                      doc_format=self.report_type,
+#                                      **behaviour)
+
     @api.multi
     def _can_print_report(self, behaviour, printer, document):
         """Predicate that decide if report can be sent to printer
@@ -128,13 +154,6 @@ class IrActionsReport(models.Model):
         if behaviour['action'] == 'server' and printer and document:
             return True
         return False
-
-    @api.noguess
-    def report_action(self, docids, data=None, config=True):
-        res = super().report_action(docids, data=data, config=config)
-        if not res.get('id'):
-            res['id'] = self.id
-        return res
 
     def render_qweb_pdf(self, docids, data=None):
         """ Generate a PDF and returns it.
