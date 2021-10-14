@@ -23,7 +23,7 @@ class ResUsers(models.Model):
     printing_action = fields.Selection(
         selection=_user_available_action_types,
     )
-    printing_printer_id = fields.Many2one(comodel_name='scanners.scanner',
+    printing_printer_id = fields.Many2one(comodel_name='printing.printer',
                                           string='Default Printer')
 
     printer_tray_id = fields.Many2one(

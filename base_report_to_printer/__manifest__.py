@@ -27,7 +27,7 @@
         'wizards/printing_printer_update_wizard_view.xml',
     ],
     'installable': True,
-    'application': True,
+    'application': False,
     'external_dependencies': {
         'python': ['cups'],
     },
