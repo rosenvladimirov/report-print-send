@@ -7,7 +7,6 @@ from odoo import models, fields, api, exceptions, _
 
 _logger = logging.getLogger(__name__)
 
-
 try:
     import cups
 except ImportError:
@@ -37,12 +36,14 @@ class PrintingServer(models.Model):
         self.ensure_one()
         connection = False
         try:
+            if self.address and self.address != 'localhost':
+                cups.setServer(self.address)
             connection = cups.Connection()
         except:
             message = _("Failed to connect to the CUPS server on %s:%s. "
                         "Check that the CUPS server is running and that "
                         "you can reach it from the Odoo server.") % (
-                            self.address, self.port)
+                          self.address, self.port)
             _logger.warning(message)
             if raise_on_error:
                 raise exceptions.UserError(message)
@@ -96,7 +97,7 @@ class PrintingServer(models.Model):
 
             # Set printers not found as unavailable
             server.printer_ids.filtered(
-                lambda record: record.system_name not in updated_printers)\
+                lambda record: record.system_name not in updated_printers) \
                 .write({'status': 'unavailable'})
 
         return res
@@ -190,12 +191,12 @@ class PrintingServer(models.Model):
                             'time-at-creation', False))),
                     'time_at_processing': job_data.get(
                         'time-at-processing', False) and
-                    fields.Datetime.to_string(datetime.fromtimestamp(
-                        job_data.get('time-at-processing', False))),
+                                          fields.Datetime.to_string(datetime.fromtimestamp(
+                                              job_data.get('time-at-processing', False))),
                     'time_at_completed': job_data.get(
                         'time-at-completed', False) and
-                    fields.Datetime.to_string(datetime.fromtimestamp(
-                        job_data.get('time-at-completed', False))),
+                                         fields.Datetime.to_string(datetime.fromtimestamp(
+                                             job_data.get('time-at-completed', False))),
                 }
 
                 # Search for the printer in Odoo
