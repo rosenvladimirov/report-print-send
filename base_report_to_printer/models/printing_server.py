@@ -1,7 +1,8 @@
 # Copyright (C) 2016 SYLEAM (<http://www.syleam.fr>)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-
+import ipaddress
 import logging
+import socket
 from datetime import datetime
 from odoo import models, fields, api, exceptions, _
 
@@ -37,7 +38,13 @@ class PrintingServer(models.Model):
         connection = False
         try:
             if self.address and self.address != 'localhost':
-                cups.setServer(self.address)
+                address = self.address
+                try:
+                    address = ipaddress.ip_address(socket.gethostbyname('cups'))
+                    address = address.compressed
+                except ValueError:
+                    _logger.warning(_('The address is not valid name'))
+                cups.setServer(address)
             connection = cups.Connection()
         except:
             message = _("Failed to connect to the CUPS server on %s:%s. "
